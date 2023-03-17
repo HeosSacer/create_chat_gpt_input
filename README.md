@@ -1,4 +1,4 @@
-# Merge Files
+# Create ChatGPT Input
 
 This Rust project is a command-line utility that searches for files with a specified extension in a directory and its subdirectories, and concatenates their contents into a single output file. The contents of each file are separated by a specified symbol and the file name.
 
