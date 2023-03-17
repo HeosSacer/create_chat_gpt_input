@@ -40,6 +40,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_WORKFLOW_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/release/merge_files
-          asset_name: merge_files
+          asset_path: ./target/release/create_chat_gpt_input
+          asset_name: create_chat_gpt_input
           asset_content_type: application/octet-stream
