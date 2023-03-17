@@ -6,7 +6,27 @@ on:
       - "v*"
 
 jobs:
-  build_and_release:
+  create_release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_WORKFLOW_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+  build_and_upload:
+    needs: create_release
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
@@ -16,7 +36,6 @@ jobs:
           - os: windows-latest
             asset_name: create_chat_gpt_input.exe
     runs-on: ${{ matrix.os }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -31,24 +50,12 @@ jobs:
       - name: Build release binary
         run: cargo build --release
 
-      - name: Create release
-        if: matrix.os == 'ubuntu-latest'
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_WORKFLOW_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-
       - name: Upload binary
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_WORKFLOW_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
           asset_path: ./target/release/${{ matrix.asset_name }}
           asset_name: ${{ matrix.asset_name }}
           asset_content_type: application/octet-stream
