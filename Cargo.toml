@@ -1,0 +1,11 @@
+[package]
+authors = ["Your Name <your.email@example.com>"]
+edition = "2018"
+name = "create_chat_gpt_input"
+version = "0.1.0"
+
+[dependencies]
+
+[[bin]]
+name = "create_chat_gpt_input"
+path = "src/main.rs"
