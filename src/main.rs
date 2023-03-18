@@ -1,7 +1,23 @@
-use std::env;
+use clap::Parser; // Use Parser instead of Clap
 use std::fs::{self, File};
 use std::io::{self, Read, Write};
 use std::path::Path;
+
+#[derive(Parser)]
+#[clap(version = "1.0", author = "Your Name <your.email@example.com>", about = "Merge files with the specified extension")]
+struct Opts {
+    /// Root directory for searching files
+    root_dir: String,
+
+    /// File extension to search for
+    extension: String,
+
+    /// Output file to merge contents into
+    output_file: String,
+
+    /// Separator to use between merged file contents
+    separator: String,
+}
 
 fn collect_files_with_extension(path: &Path, extension: &str) -> io::Result<Vec<String>> {
     let mut file_paths = Vec::new();
@@ -31,22 +47,13 @@ fn merge_files(file_paths: &[String], output_file: &str, separator: &str) -> io:
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() != 5 {
-        eprintln!("Usage: {} <root_dir> <extension> <output_file> <separator>", args[0]);
-        return;
-    }
+    let opts: Opts = Opts::parse();
 
-    let root_dir = &args[1];
-    let extension = &args[2];
-    let output_file = &args[3];
-    let separator = &args[4];
-
-    let file_paths = collect_files_with_extension(Path::new(root_dir), extension)
+    let file_paths = collect_files_with_extension(Path::new(&opts.root_dir), &opts.extension)
         .expect("Failed to collect files with specified extension");
 
-    merge_files(&file_paths, output_file, separator)
+    merge_files(&file_paths, &opts.output_file, &opts.separator)
         .expect("Failed to merge file contents");
 
-    println!("Successfully merged {} files into {}.", file_paths.len(), output_file);
+    println!("Successfully merged {} files into {}.", file_paths.len(), opts.output_file);
 }
